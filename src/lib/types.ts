@@ -1,3 +1,4 @@
+// deno-lint-ignore-file camelcase no-explicit-any
 export type Provider = 'azure' | 'bitbucket' | 'facebook' | 'github' | 'gitlab' | 'google' | 'twitter' | 'apple' | 'discord'
 
 export type AuthChangeEvent =
@@ -58,7 +59,7 @@ export interface UserAttributes {
   /**
    * A custom data object. Can be any JSON.
    */
-  data?: object
+  data?: Record<string, unknown>
 }
 
 export interface Subscription {

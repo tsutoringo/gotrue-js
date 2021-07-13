@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck code works anyways ig?
 
 /**
  * https://mathiasbynens.be/notes/globalthis
@@ -14,7 +14,7 @@ export function polyfillGlobalThis() {
     })
     __magic__.globalThis = __magic__
     delete Object.prototype.__magic__
-  } catch (e) {
+  } catch (_e) {
     if (typeof self !== 'undefined') {
       self.globalThis = self
     }

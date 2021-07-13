@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 type Cookie = {
   name: string
   value: string
@@ -25,6 +26,7 @@ function serialize(
 ) {
   const opt = options || {}
   const enc = encodeURIComponent
+  // deno-lint-ignore no-control-regex
   const fieldContentRegExp = /^[\u0009\u0020-\u007e\u0080-\u00ff]+$/
 
   if (typeof enc !== 'function') {

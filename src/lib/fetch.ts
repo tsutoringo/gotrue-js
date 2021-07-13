@@ -1,5 +1,4 @@
-import fetch from 'cross-fetch'
-
+// deno-lint-ignore-file no-explicit-any
 export interface FetchOptions {
   headers?: {
     [key: string]: string
@@ -24,7 +23,7 @@ const handleError = (error: any, reject: any) => {
   })
 }
 
-const _getRequestParams = (method: RequestMethodType, options?: FetchOptions, body?: object) => {
+const _getRequestParams = (method: RequestMethodType, options?: FetchOptions, body?: Record<string, unknown>) => {
   const params: { [k: string]: any } = { method, headers: options?.headers || {} }
 
   if (method === 'GET') {
@@ -37,11 +36,11 @@ const _getRequestParams = (method: RequestMethodType, options?: FetchOptions, bo
   return params
 }
 
-async function _handleRequest(
+function _handleRequest(
   method: RequestMethodType,
   url: string,
   options?: FetchOptions,
-  body?: object
+  body?: Record<string, unknown>
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     fetch(url, _getRequestParams(method, options, body))
@@ -55,18 +54,18 @@ async function _handleRequest(
   })
 }
 
-export async function get(url: string, options?: FetchOptions): Promise<any> {
+export function get(url: string, options?: FetchOptions): Promise<any> {
   return _handleRequest('GET', url, options)
 }
 
-export async function post(url: string, body: object, options?: FetchOptions): Promise<any> {
+export function post(url: string, body: any, options?: FetchOptions): Promise<any> {
   return _handleRequest('POST', url, options, body)
 }
 
-export async function put(url: string, body: object, options?: FetchOptions): Promise<any> {
+export function put(url: string, body: any, options?: FetchOptions): Promise<any> {
   return _handleRequest('PUT', url, options, body)
 }
 
-export async function remove(url: string, body: object, options?: FetchOptions): Promise<any> {
+export function remove(url: string, body: any, options?: FetchOptions): Promise<any> {
   return _handleRequest('DELETE', url, options, body)
 }

@@ -1,8 +1,9 @@
-import { get, post, put, remove } from './lib/fetch'
-import { Session, Provider, UserAttributes, CookieOptions, User } from './lib/types'
-import { COOKIE_OPTIONS } from './lib/constants'
-import { setCookie, deleteCookie } from './lib/cookies'
-import { expiresAt } from './lib/helpers'
+// deno-lint-ignore-file no-explicit-any
+import { get, post, put, remove } from './lib/fetch.ts'
+import { Session, Provider, UserAttributes, CookieOptions, User } from './lib/types.ts'
+import { COOKIE_OPTIONS } from './lib/constants.ts'
+import { setCookie, deleteCookie } from './lib/cookies.ts'
+import { expiresAt } from './lib/helpers.ts'
 
 export default class GoTrueApi {
   protected url: string
@@ -44,13 +45,13 @@ export default class GoTrueApi {
     } = {}
   ): Promise<{ data: Session | User | null; error: Error | null }> {
     try {
-      let headers = { ...this.headers }
+      const headers = { ...this.headers }
       let queryString = ''
       if (options.redirectTo) {
         queryString = '?redirect_to=' + encodeURIComponent(options.redirectTo)
       }
       const data = await post(`${this.url}/signup${queryString}`, { email, password }, { headers })
-      let session = { ...data }
+      const session = { ...data }
       if (session.expires_in) session.expires_at = expiresAt(data.expires_in)
       return { data: session, error: null }
     } catch (error) {
@@ -72,13 +73,13 @@ export default class GoTrueApi {
     } = {}
   ): Promise<{ data: Session | null; error: Error | null }> {
     try {
-      let headers = { ...this.headers }
+      const headers = { ...this.headers }
       let queryString = '?grant_type=password'
       if (options.redirectTo) {
         queryString += '&redirect_to=' + encodeURIComponent(options.redirectTo)
       }
       const data = await post(`${this.url}/token${queryString}`, { email, password }, { headers })
-      let session = { ...data }
+      const session = { ...data }
       if (session.expires_in) session.expires_at = expiresAt(data.expires_in)
       return { data: session, error: null }
     } catch (error) {
@@ -96,9 +97,9 @@ export default class GoTrueApi {
     options: {
       redirectTo?: string
     } = {}
-  ): Promise<{ data: {} | null; error: Error | null }> {
+  ): Promise<{ data: Record<string, unknown> | null; error: Error | null }> {
     try {
-      let headers = { ...this.headers }
+      const headers = { ...this.headers }
       let queryString = ''
       if (options.redirectTo) {
         queryString += '?redirect_to=' + encodeURIComponent(options.redirectTo)
@@ -122,7 +123,7 @@ export default class GoTrueApi {
     } = {}
   ): Promise<{ data: User | null; error: Error | null }> {
     try {
-      let headers = { ...this.headers }
+      const headers = { ...this.headers }
       let queryString = ''
       if (options.redirectTo) {
         queryString += '?redirect_to=' + encodeURIComponent(options.redirectTo)
@@ -144,9 +145,9 @@ export default class GoTrueApi {
     options: {
       redirectTo?: string
     } = {}
-  ): Promise<{ data: {} | null; error: Error | null }> {
+  ): Promise<{ data: Record<string, unknown> | null; error: Error | null }> {
     try {
-      let headers = { ...this.headers }
+      const headers = { ...this.headers }
       let queryString = ''
       if (options.redirectTo) {
         queryString += '?redirect_to=' + encodeURIComponent(options.redirectTo)
@@ -199,7 +200,7 @@ export default class GoTrueApi {
       scopes?: string
     }
   ) {
-    let urlParams: string[] = [`provider=${encodeURIComponent(provider)}`]
+    const urlParams: string[] = [`provider=${encodeURIComponent(provider)}`]
     if (options?.redirectTo) {
       urlParams.push(`redirect_to=${encodeURIComponent(options.redirectTo)}`)
     }
@@ -279,7 +280,7 @@ export default class GoTrueApi {
         { refresh_token: refreshToken },
         { headers: this.headers }
       )
-      let session = { ...data }
+      const session = { ...data }
       if (session.expires_in) session.expires_at = expiresAt(data.expires_in)
       return { data: session, error: null }
     } catch (error) {

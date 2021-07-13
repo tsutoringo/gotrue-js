@@ -1,6 +1,7 @@
-import GoTrueApi from './GoTrueApi'
-import { isBrowser, getParameterByName, uuid, LocalStorage } from './lib/helpers'
-import { GOTRUE_URL, DEFAULT_HEADERS, STORAGE_KEY } from './lib/constants'
+// deno-lint-ignore-file camelcase
+import GoTrueApi from './GoTrueApi.ts'
+import { isBrowser, getParameterByName, uuid, LocalStorage } from './lib/helpers.ts'
+import { GOTRUE_URL, DEFAULT_HEADERS, STORAGE_KEY } from './lib/constants.ts'
 import {
   Session,
   User,
@@ -10,8 +11,8 @@ import {
   AuthChangeEvent,
   CookieOptions,
   UserCredentials,
-} from './lib/types'
-import { polyfillGlobalThis } from './lib/polyfills'
+} from './lib/types.ts'
+import { polyfillGlobalThis } from './lib/polyfills.ts'
 
 polyfillGlobalThis() // Make "globalThis" available
 
@@ -81,7 +82,7 @@ export default class GoTrueClient {
       if (settings.detectSessionInUrl && isBrowser() && !!getParameterByName('access_token')) {
         this.getSessionFromUrl({ storeSession: true })
       }
-    } catch (error) {
+    } catch (_error) {
       console.log('Error getting session from URL.')
     }
   }
@@ -389,12 +390,11 @@ export default class GoTrueClient {
   ): { data: Subscription | null; error: Error | null } {
     try {
       const id: string = uuid()
-      const self = this
       const subscription: Subscription = {
         id,
         callback,
         unsubscribe: () => {
-          self.stateChangeEmitters.delete(id)
+          this.stateChangeEmitters.delete(id)
         },
       }
       this.stateChangeEmitters.set(id, subscription)
@@ -448,7 +448,7 @@ export default class GoTrueClient {
       return { provider, url, data: null, session: null, user: null, error: null }
     } catch (error) {
       // fallback to returning the URL
-      if (!!url) return { provider, url, data: null, session: null, user: null, error: null }
+      if (url) return { provider, url, data: null, session: null, user: null, error: null }
       return { data: null, user: null, session: null, error }
     }
   }
@@ -583,6 +583,6 @@ export default class GoTrueClient {
     if (value <= 0 || !this.autoRefreshToken) return
 
     this.refreshTokenTimer = setTimeout(() => this._callRefreshToken(), value)
-    if (typeof this.refreshTokenTimer.unref === 'function') this.refreshTokenTimer.unref()
+    // if (typeof this.refreshTokenTimer.unref === 'function') this.refreshTokenTimer.unref()
   }
 }

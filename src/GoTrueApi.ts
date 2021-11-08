@@ -5,6 +5,11 @@ import { COOKIE_OPTIONS } from './lib/constants.ts'
 import { setCookie, deleteCookie } from './lib/cookies.ts'
 import { expiresAt } from './lib/helpers.ts'
 
+export interface ApiError {
+  message: string
+  status: number
+}
+
 export default class GoTrueApi {
   protected url: string
   protected headers: {
@@ -33,6 +38,7 @@ export default class GoTrueApi {
    * @param email The email address of the user.
    * @param password The password of the user.
    * @param redirectTo A URL or mobile address to send the user to after they are confirmed.
+   * @param data Optional user metadata.
    *
    * @returns A logged-in session if the server has "autoconfirm" ON
    * @returns A user if the server has "autoconfirm" OFF
@@ -42,20 +48,25 @@ export default class GoTrueApi {
     password: string,
     options: {
       redirectTo?: string
+      data?: Record<string, unknown>
     } = {}
-  ): Promise<{ data: Session | User | null; error: Error | null }> {
+  ): Promise<{ data: Session | User | null; error: ApiError | null }> {
     try {
       const headers = { ...this.headers }
       let queryString = ''
       if (options.redirectTo) {
         queryString = '?redirect_to=' + encodeURIComponent(options.redirectTo)
       }
-      const data = await post(`${this.url}/signup${queryString}`, { email, password }, { headers })
+      const data = await post(
+        `${this.url}/signup${queryString}`,
+        { email, password, data: options.data },
+        { headers }
+      )
       const session = { ...data }
       if (session.expires_in) session.expires_at = expiresAt(data.expires_in)
       return { data: session, error: null }
-    } catch (error) {
-      return { data: null, error }
+    } catch (e) {
+      return { data: null, error: e as ApiError }
     }
   }
 
@@ -71,7 +82,7 @@ export default class GoTrueApi {
     options: {
       redirectTo?: string
     } = {}
-  ): Promise<{ data: Session | null; error: Error | null }> {
+  ): Promise<{ data: Session | null; error: ApiError | null }> {
     try {
       const headers = { ...this.headers }
       let queryString = '?grant_type=password'
@@ -82,40 +93,48 @@ export default class GoTrueApi {
       const session = { ...data }
       if (session.expires_in) session.expires_at = expiresAt(data.expires_in)
       return { data: session, error: null }
-    } catch (error) {
-      return { data: null, error }
+    } catch (e) {
+      return { data: null, error: e as ApiError }
     }
   }
 
   /**
    * Signs up a new user using their phone number and a password.
-   * @param phone The email address of the user.
+   * @param phone The phone number of the user.
    * @param password The password of the user.
+   * @param data Optional user metadata.
    */
   async signUpWithPhone(
     phone: string,
-    password: string
-  ): Promise<{ data: Session | User | null; error: Error | null }> {
+    password: string,
+    options: {
+      data?: Record<string, unknown>
+    } = {}
+  ): Promise<{ data: Session | User | null; error: ApiError | null }> {
     try {
       const headers = { ...this.headers }
-      const data = await post(`${this.url}/signup`, { phone, password }, { headers })
+      const data = await post(
+        `${this.url}/signup`,
+        { phone, password, data: options.data },
+        { headers }
+      )
       const session = { ...data }
       if (session.expires_in) session.expires_at = expiresAt(data.expires_in)
       return { data: session, error: null }
-    } catch (error) {
-      return { data: null, error }
+    } catch (e) {
+      return { data: null, error: e as ApiError }
     }
   }
 
   /**
    * Logs in an existing user using their phone number and password.
-   * @param phone The email address of the user.
+   * @param phone The phone number of the user.
    * @param password The password of the user.
    */
   async signInWithPhone(
     phone: string,
     password: string
-  ): Promise<{ data: Session | null; error: Error | null }> {
+  ): Promise<{ data: Session | null; error: ApiError | null }> {
     try {
       const headers = { ...this.headers }
       const queryString = '?grant_type=password'
@@ -123,8 +142,8 @@ export default class GoTrueApi {
       const session = { ...data }
       if (session.expires_in) session.expires_at = expiresAt(data.expires_in)
       return { data: session, error: null }
-    } catch (error) {
-      return { data: null, error }
+    } catch (e) {
+      return { data: null, error: e as ApiError }
     }
   }
 
@@ -138,7 +157,7 @@ export default class GoTrueApi {
     options: {
       redirectTo?: string
     } = {}
-  ): Promise<{ data: Record<string, unknown> | null; error: Error | null }> {
+  ): Promise<{ data: Record<string, unknown> | null; error: ApiError | null }> {
     try {
       const headers = { ...this.headers }
       let queryString = ''
@@ -147,8 +166,8 @@ export default class GoTrueApi {
       }
       const data = await post(`${this.url}/magiclink${queryString}`, { email }, { headers })
       return { data, error: null }
-    } catch (error) {
-      return { data: null, error }
+    } catch (e) {
+      return { data: null, error: e as ApiError }
     }
   }
 
@@ -157,13 +176,13 @@ export default class GoTrueApi {
    * @param phone The user's phone number WITH international prefix
    */
   // deno-lint-ignore ban-types
-  async sendMobileOTP(phone: string): Promise<{ data: {} | null; error: Error | null }> {
+  async sendMobileOTP(phone: string): Promise<{ data: {} | null; error: ApiError | null }> {
     try {
       const headers = { ...this.headers }
       const data = await post(`${this.url}/otp`, { phone }, { headers })
       return { data, error: null }
-    } catch (error) {
-      return { data: null, error }
+    } catch (e) {
+      return { data: null, error: e as ApiError }
     }
   }
 
@@ -179,7 +198,7 @@ export default class GoTrueApi {
     options: {
       redirectTo?: string
     } = {}
-  ): Promise<{ data: Session | User | null; error: Error | null }> {
+  ): Promise<{ data: Session | User | null; error: ApiError | null }> {
     try {
       const headers = { ...this.headers }
       const data = await post(
@@ -188,8 +207,8 @@ export default class GoTrueApi {
         { headers }
       )
       return { data, error: null }
-    } catch (error) {
-      return { data: null, error }
+    } catch (e) {
+      return { data: null, error: e as ApiError }
     }
   }
 
@@ -197,23 +216,29 @@ export default class GoTrueApi {
    * Sends an invite link to an email address.
    * @param email The email address of the user.
    * @param redirectTo A URL or mobile address to send the user to after they are confirmed.
+   * @param data Optional user metadata
    */
   async inviteUserByEmail(
     email: string,
     options: {
       redirectTo?: string
+      data?: Record<string, unknown>
     } = {}
-  ): Promise<{ data: User | null; error: Error | null }> {
+  ): Promise<{ data: User | null; error: ApiError | null }> {
     try {
       const headers = { ...this.headers }
       let queryString = ''
       if (options.redirectTo) {
         queryString += '?redirect_to=' + encodeURIComponent(options.redirectTo)
       }
-      const data = await post(`${this.url}/invite${queryString}`, { email }, { headers })
+      const data = await post(
+        `${this.url}/invite${queryString}`,
+        { email, data: options.data },
+        { headers }
+      )
       return { data, error: null }
     } catch (error) {
-      return { data: null, error }
+      return { data: null, error: error as ApiError }
     }
   }
 
@@ -227,7 +252,7 @@ export default class GoTrueApi {
     options: {
       redirectTo?: string
     } = {}
-  ): Promise<{ data: Record<string, unknown> | null; error: Error | null }> {
+  ): Promise<{ data: Record<string, unknown> | null; error: ApiError | null }> {
     try {
       const headers = { ...this.headers }
       let queryString = ''
@@ -236,8 +261,8 @@ export default class GoTrueApi {
       }
       const data = await post(`${this.url}/recover${queryString}`, { email }, { headers })
       return { data, error: null }
-    } catch (error) {
-      return { data: null, error }
+    } catch (e) {
+      return { data: null, error: e as ApiError }
     }
   }
 
@@ -256,7 +281,7 @@ export default class GoTrueApi {
    * Removes a logged-in session.
    * @param jwt A valid, logged-in JWT.
    */
-  async signOut(jwt: string): Promise<{ error: Error | null }> {
+  async signOut(jwt: string): Promise<{ error: ApiError | null }> {
     try {
       await post(
         `${this.url}/logout`,
@@ -264,8 +289,8 @@ export default class GoTrueApi {
         { headers: this._createRequestHeaders(jwt), noResolveJson: true }
       )
       return { error: null }
-    } catch (error) {
-      return { error }
+    } catch (e) {
+      return { error: e as ApiError }
     }
   }
 
@@ -298,12 +323,12 @@ export default class GoTrueApi {
    */
   async getUser(
     jwt: string
-  ): Promise<{ user: User | null; data: User | null; error: Error | null }> {
+  ): Promise<{ user: User | null; data: User | null; error: ApiError | null }> {
     try {
       const data: any = await get(`${this.url}/user`, { headers: this._createRequestHeaders(jwt) })
       return { user: data, data, error: null }
-    } catch (error) {
-      return { user: null, data: null, error }
+    } catch (e) {
+      return { user: null, data: null, error: e as ApiError }
     }
   }
 
@@ -315,26 +340,29 @@ export default class GoTrueApi {
   async updateUser(
     jwt: string,
     attributes: UserAttributes
-  ): Promise<{ user: User | null; data: User | null; error: Error | null }> {
+  ): Promise<{ user: User | null; data: User | null; error: ApiError | null }> {
     try {
       const data: any = await put(`${this.url}/user`, attributes, {
         headers: this._createRequestHeaders(jwt),
       })
       return { user: data, data, error: null }
-    } catch (error) {
-      return { user: null, data: null, error }
+    } catch (e) {
+      return { user: null, data: null, error: e as ApiError }
     }
   }
 
   /**
-   * Delete an user.
+   * Delete a user. Requires a `service_role` key.
+   *
+   * This function should only be called on a server. Never expose your `service_role` key in the browser.
+   *
    * @param uid The user uid you want to remove.
    * @param jwt A valid JWT. Must be a full-access API key (e.g. service_role key).
    */
   async deleteUser(
     uid: string,
     jwt: string
-  ): Promise<{ user: User | null; data: User | null; error: Error | null }> {
+  ): Promise<{ user: User | null; data: User | null; error: ApiError | null }> {
     try {
       const data: any = await remove(
         `${this.url}/admin/users/${uid}`,
@@ -344,8 +372,8 @@ export default class GoTrueApi {
         }
       )
       return { user: data, data, error: null }
-    } catch (error) {
-      return { user: null, data: null, error }
+    } catch (e) {
+      return { user: null, data: null, error: e as ApiError }
     }
   }
 
@@ -355,7 +383,7 @@ export default class GoTrueApi {
    */
   async refreshAccessToken(
     refreshToken: string
-  ): Promise<{ data: Session | null; error: Error | null }> {
+  ): Promise<{ data: Session | null; error: ApiError | null }> {
     try {
       const data: any = await post(
         `${this.url}/token?grant_type=refresh_token`,
@@ -365,8 +393,8 @@ export default class GoTrueApi {
       const session = { ...data }
       if (session.expires_in) session.expires_at = expiresAt(data.expires_in)
       return { data: session, error: null }
-    } catch (error) {
-      return { data: null, error }
+    } catch (e) {
+      return { data: null, error: e as ApiError }
     }
   }
 
@@ -426,15 +454,15 @@ export default class GoTrueApi {
    * @param data Optional user metadata. For signup only.
    * @param redirectTo The link type ("signup" or "magiclink" or "recovery" or "invite").
    */
-   async generateLink(
+  async generateLink(
     type: 'signup' | 'magiclink' | 'recovery' | 'invite',
     email: string,
     options: {
       password?: string
-      data?: any
+      data?: Record<string, unknown>
       redirectTo?: string
     } = {}
-  ): Promise<{ data: Session | User | null; error: Error | null }> {
+  ): Promise<{ data: Session | User | null; error: ApiError | null }> {
     try {
       const data: any = await post(
         `${this.url}/admin/generate_link`,
@@ -448,8 +476,8 @@ export default class GoTrueApi {
         { headers: this.headers }
       )
       return { data, error: null }
-    } catch (error) {
-      return { data: null, error }
+    } catch (e) {
+      return { data: null, error: e as ApiError }
     }
   }
 }

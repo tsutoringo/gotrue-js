@@ -63,6 +63,7 @@ services:
       GOTRUE_SMS_AUTOCONFIRM: 'true'
     depends_on:
       - db
+    restart: on-failure
   disabled: # Signup disabled
     image: supabase/gotrue:latest
     ports:
@@ -86,6 +87,7 @@ services:
       GOTRUE_EXTERNAL_EMAIL_ENABLED: 'false'
     depends_on:
       - db
+    restart: on-failure
   mail:
     image: phamhieu/inbucket:latest
     ports:

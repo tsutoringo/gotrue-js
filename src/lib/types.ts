@@ -10,6 +10,8 @@ export type Provider =
   | 'apple'
   | 'discord'
   | 'twitch'
+  | 'spotify'
+  | 'slack'
 
 export type AuthChangeEvent =
   | 'SIGNED_IN'
@@ -47,6 +49,7 @@ export interface User {
   recovery_sent_at?: string
   action_link?: string
   email?: string
+  phone?: string
   created_at: string
   email_confirmed_at?: string
   phone_confirmed_at?: string

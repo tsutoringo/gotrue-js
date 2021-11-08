@@ -23,3 +23,5 @@ const auth = new GoTrueClient({ url: GOTRUE_URL })
 - `signUp()`: https://supabase.io/docs/reference/javascript/auth-signup
 - `signIn()`: https://supabase.io/docs/reference/javascript/auth-signin
 - `signOut()`: https://supabase.io/docs/reference/javascript/auth-signout
+
+Note that in the Deno port you cannot declare a custom fetcher like in the NodeJS version because Deno already has fetch built in so its kinda pointless.

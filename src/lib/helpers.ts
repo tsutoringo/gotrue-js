@@ -11,7 +11,7 @@ export function uuid() {
   })
 }
 
-export const isBrowser = () => typeof window !== 'undefined'
+export const isBrowser = () => (typeof window !== 'undefined') && !('Deno' in window)
 
 export function getParameterByName(name: string, url?: string) {
   if (!url) url = window.location.href
